@@ -33,6 +33,7 @@ class DB {
       this.db.run(this.createQuery);
     }
     window.db = this.db;
+    renderTable();
   }
 
   #storeIndexDB() {
@@ -58,4 +59,11 @@ class DB {
   select(selectQuery) {
     return this.db.exec("SELECT * FROM todo");
   }
+
+  UpdateRow(query, id) {
+    this.db.run(query, [id]);
+    this.#storeIndexDB();
+  }
 }
+
+const database = new DB();
