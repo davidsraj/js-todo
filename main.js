@@ -3,9 +3,10 @@ const createQuery =
   "CREATE TABLE todo (todo_id INTEGER PRIMARY KEY, todo TEXT NOT NULL, state TEXT NOT NULL);";
 const insertQuery = "INSERT INTO todo VALUES (?, ?, ?)";
 const deleteQuery = "DELETE FROM todo WHERE todo_id = ?";
+const updateQuery = "UPDATE todo SET todo = ? and state = ? WHERE todo_id = ?";
 
 // initialize the DB
-var dbAPI = new DB(createQuery);
+var dbAPI = new DB(createQuery, renderTable);
 
 function insertTODO() {
   var text = document.getElementById("myInput").value;
@@ -28,7 +29,6 @@ function renderTable() {
     document.getElementById("sql-result").innerHTML = "";
     return;
   }
-
   // construct the header
   let headerString = "";
   let headerColumns = result[0]?.columns;
@@ -47,12 +47,12 @@ function renderTable() {
     var rowString = "";
     let todoId = row[0];
     row.forEach((column, index) => {
-      let clmnname = headerColumns?.[index];
-      console.log(clmnname, "columnname");
+      let columnName = headerColumns?.[index];
+      console.log(columnName, "columnname");
       if (index == "0") {
         rowString += `<td>${column}</td>`;
       } else {
-        rowString += `<td><span class="spnelt" id="spn_${clmnname}_${todoId}">${column}</span><input type="text" id="inp_${clmnname}_${todoId}" class="inpelt d-none" value="${column}" /></td>`;
+        rowString += `<td><span class="spnelt" id="spn_${columnName}_${todoId}">${column}</span><input type="text" id="inp_${columnName}_${todoId}" class="inpelt d-none" value="${column}" /></td>`;
       }
     });
 
@@ -73,7 +73,7 @@ function EditTodo(todoId) {
   let hdrclmnlist = document
     .getElementById("headercolumnslist")
     .getAttribute("data-id");
-  console.log(hdrclmnlist, "fgf");
+  console.log(hdrclmnlist);
   let ahdrclmn = hdrclmnlist.split(",");
   ahdrclmn.shift();
   console.log(`todoID ${todoId}`);
@@ -110,7 +110,7 @@ function SaveTodo(todoId) {
   setqstr = setqstr.replace(/,\s*$/, "");
   let updateQuery = "UPDATE todo SET " + setqstr + " WHERE todo_id = ?";
   console.log(updateQuery);
-  database.UpdateRow(updateQuery, todoId);
+  dbAPI.update(updateQuery, [todoId]);
   document.getElementById(`Save_${todoId}`).classList.add("d-none");
   document.getElementById(`Edit_${todoId}`).classList.remove("d-none");
 }

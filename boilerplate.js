@@ -4,16 +4,17 @@ class DB {
     locateFile: (filename) =>
       "https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/sql-wasm.wasm",
   };
-  constructor() {
-    this.getLocalStorageData();
+  constructor(createQuery, renderTable) {
+    this.getLocalStorageData(createQuery, renderTable);
   }
 
-  getLocalStorageData() {
+  getLocalStorageData(createQuery, renderTable) {
     initSqlJs(this.config).then((SQL) => {
       localforage
         .getItem("db")
         .then((value) => {
-          this.#initDB(value, SQL);
+          this.#initDB(value, SQL, createQuery);
+          renderTable();
         })
         .catch(function (err) {
           console.log("Error: " + err);
@@ -21,7 +22,7 @@ class DB {
     });
   }
 
-  #initDB(value, SQL) {
+  #initDB(value, SQL, createQuery) {
     if (value) {
       // if db exists, load it
       this.db = new SQL.Database(value);
@@ -30,10 +31,8 @@ class DB {
       console.log("Creating db");
       this.db = new SQL.Database();
       // Run a query without reading the results
-      this.db.run(this.createQuery);
+      this.db.run(createQuery);
     }
-    window.db = this.db;
-    renderTable();
   }
 
   #storeIndexDB() {
@@ -48,6 +47,7 @@ class DB {
   }
 
   update(updateQuery, values) {
+    this.db.run(updateQuery, values);
     this.#storeIndexDB();
   }
 
@@ -57,7 +57,7 @@ class DB {
   }
 
   select(selectQuery) {
-    return this.db.exec("SELECT * FROM todo");
+    return this.db.exec(selectQuery);
   }
 
   UpdateRow(query, id) {
@@ -65,5 +65,3 @@ class DB {
     this.#storeIndexDB();
   }
 }
-
-const database = new DB();
