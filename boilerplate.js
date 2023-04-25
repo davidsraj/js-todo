@@ -5,10 +5,10 @@ class DB {
       "https://cdn.jsdelivr.net/npm/sql.js@1.8.0/dist/sql-wasm.wasm",
   };
   constructor(createQuery, renderTable) {
-    this.getLocalStorageData(createQuery, renderTable);
+    this.#getLocalStorageData(createQuery, renderTable);
   }
 
-  getLocalStorageData(createQuery, renderTable) {
+  #getLocalStorageData(createQuery, renderTable) {
     initSqlJs(this.config).then((SQL) => {
       localforage
         .getItem("db")
